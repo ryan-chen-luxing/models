@@ -2,7 +2,7 @@ import youtube_dl
 import json
 import os
 import sys
-import tykoapi
+#import tykoapi
 
 def my_hook(d):
     if d['status'] == 'finished':
