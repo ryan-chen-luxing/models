@@ -8,7 +8,7 @@ def my_hook(d):
     if d['status'] == 'finished':
         videoId = os.path.splitext(os.path.split(d['filename'])[1])[0]
 
-        command = 'C:/Users/ryan/AppData/Local/Programs/Python/Python36/python.exe ObjectDetectionModule.py'
+        command = 'python ObjectDetectionModule.py'
         command += ' --filename "{}"'.format(d['filename'])
         command += ' --scaleFactor "{}"'.format(1.0)
         command += ' --width "{}"'.format(640)
@@ -17,11 +17,11 @@ def my_hook(d):
         os.system(command)
 
 
-        command = 'C:/Projects/LENS-Web-Platform/Lens.Tensorflow/openpose/openpose/build/bin/OpenPoseDemo.exe'
-        command += ' --video "{}"'.format(d['filename'])
-        command += ' --write_json "{}_PoseTracking.json"'.format(videoId)
-        command += ' --face --hand'
-        command += ' --videoInfo "{}_ObjectDetection.json"'.format(videoId)
+        #command = 'C:/Projects/LENS-Web-Platform/Lens.Tensorflow/openpose/openpose/build/bin/OpenPoseDemo.exe'
+        #command += ' --video "{}"'.format(d['filename'])
+        #command += ' --write_json "{}_PoseTracking.json"'.format(videoId)
+        #command += ' --face --hand'
+        #command += ' --videoInfo "{}_ObjectDetection.json"'.format(videoId)
 
         os.system(command)
 
