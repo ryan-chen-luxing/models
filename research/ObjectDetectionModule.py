@@ -15,6 +15,7 @@ if __name__ == '__main__':
     tf.app.flags.DEFINE_float('searchThreshold', 0.25, 'threshold used in searching objects being tracked')
     tf.app.flags.DEFINE_string('outputFilename', None, 'output filename of the json ')
     tf.app.flags.DEFINE_bool('disalbeDisplay', False, 'for console terminal')
+    tf.app.flags.DEFINE_bool('useTracker', False, 'tracking the person and output persons id')
 
 class NumpyEncoder(json.JSONEncoder):
     """ Special json encoder for numpy types """
@@ -63,7 +64,7 @@ def searchObject(bbox, className, validTrackers, bboxesTracker, classNamesTracke
                     result = i
     return result
 
-def runObjectDetection(filename, scaleFactor, width, detectThreshold, searchThreshold, outputFilename, disalbeDisplay):
+def runObjectDetection(filename, scaleFactor, width, detectThreshold, searchThreshold, outputFilename, disalbeDisplay, useTracker):
     cap = cv2.VideoCapture(filename)
     videoWidth = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
     videoHeight = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
@@ -119,28 +120,29 @@ def runObjectDetection(filename, scaleFactor, width, detectThreshold, searchThre
         if scaleFactor != 1.0:
             frame = cv2.resize(frame, dsize=(resizeWidth, resizeHeight))
 
-        validTrackers = []
-        for i in range(0, len(trackers)):
-            if trackers[i] != None:
-                validTrackers.append(True)
-            else:
-                validTrackers.append(False)
-
-        for i in range(0, len(trackers)):
-            if trackers[i] != None:
-                if frameIndex - lastDetectedFrame[i] < frameRate * validTime:
-                    success, rect = trackers[i].update(frame)
-                    if success:
-                        bboxesTracker[i] = (int(round(rect[0])),
-                                            int(round(rect[1])),
-                                            int(round(rect[0] + rect[2])),
-                                            int(round(rect[1] + rect[3])))
-                    else:
-                        print('trackers[{}].update() failed'.format(i))
-                        trackers[i] = None
+        if useTracker:
+            validTrackers = []
+            for i in range(0, len(trackers)):
+                if trackers[i] != None:
+                    validTrackers.append(True)
                 else:
-                    validTrackers[i] = False
-                    print('trackers[{}] expired'.format(i))
+                    validTrackers.append(False)
+
+            for i in range(0, len(trackers)):
+                if trackers[i] != None:
+                    if frameIndex - lastDetectedFrame[i] < frameRate * validTime:
+                        success, rect = trackers[i].update(frame)
+                        if success:
+                            bboxesTracker[i] = (int(round(rect[0])),
+                                                int(round(rect[1])),
+                                                int(round(rect[0] + rect[2])),
+                                                int(round(rect[1] + rect[3])))
+                        else:
+                            print('trackers[{}].update() failed'.format(i))
+                            trackers[i] = None
+                    else:
+                        validTrackers[i] = False
+                        print('trackers[{}] expired'.format(i))
 
         objects = theApi.getObjects(frame, detectThreshold)
 
@@ -153,20 +155,23 @@ def runObjectDetection(filename, scaleFactor, width, detectThreshold, searchThre
             x2 = int(round(object['x2'] * frame.shape[1]))
             y2 = int(round(object['y2'] * frame.shape[0]))
 
-            objectId = searchObject((x1, y1, x2, y2), object['class'], validTrackers, bboxesTracker, classNamesTracker, searchThreshold)
+            if useTracker:
+                objectId = searchObject((x1, y1, x2, y2), object['class'], validTrackers, bboxesTracker, classNamesTracker, searchThreshold)
 
-            if objectId < 0:
-                bboxesTracker.append((x1, y1, x2, y2))
-                classNamesTracker.append(object['class'])
-                lastDetectedFrame.append(frameIndex)
+                if objectId < 0:
+                    bboxesTracker.append((x1, y1, x2, y2))
+                    classNamesTracker.append(object['class'])
+                    lastDetectedFrame.append(frameIndex)
 
-                tracker = cv2.TrackerKCF_create()
-                tracker.init(frame, (x1, y1, x2-x1, y2-y1))
-                trackers.append(tracker)
-                objectId = len(trackers) - 1
+                    tracker = cv2.TrackerKCF_create()
+                    tracker.init(frame, (x1, y1, x2-x1, y2-y1))
+                    trackers.append(tracker)
+                    objectId = len(trackers) - 1
+                else:
+                    validTrackers[objectId] = False
+                    lastDetectedFrame[objectId] = frameIndex
             else:
-                validTrackers[objectId] = False
-                lastDetectedFrame[objectId] = frameIndex
+                objectId = 0
 
             object['id'] = objectId
 
@@ -175,15 +180,16 @@ def runObjectDetection(filename, scaleFactor, width, detectThreshold, searchThre
             #cv2.putText(frame, text, (x1, y1), cv2.FONT_HERSHEY_SIMPLEX,
             #            int(math.ceil(scaleFactor)), (255, 255, 255), int(math.ceil(scaleFactor * 1.0)), cv2.LINE_AA)
 
-        for i in range(0, len(trackers)):
-            if trackers[i] != None and frameIndex - lastDetectedFrame[i] < frameRate * validTime:
-                bboxTracker = bboxesTracker[i]
-                classNameTracker = classNamesTracker[i]
-                color = trackerColor[i%len(trackerColor)]
-                cv2.rectangle(frame, (bboxTracker[0], bboxTracker[1]), (bboxTracker[2], bboxTracker[3]), color, 2)
-                text = '{}'.format(i)
-                cv2.putText(frame, text, (bboxTracker[0], bboxTracker[1] + 25), cv2.FONT_HERSHEY_SIMPLEX,
-                            int(math.ceil(scaleFactor)), color, int(math.ceil(scaleFactor * 2.0)), cv2.LINE_AA)
+        if useTracker:
+            for i in range(0, len(trackers)):
+                if trackers[i] != None and frameIndex - lastDetectedFrame[i] < frameRate * validTime:
+                    bboxTracker = bboxesTracker[i]
+                    classNameTracker = classNamesTracker[i]
+                    color = trackerColor[i%len(trackerColor)]
+                    cv2.rectangle(frame, (bboxTracker[0], bboxTracker[1]), (bboxTracker[2], bboxTracker[3]), color, 2)
+                    text = '{}'.format(i)
+                    cv2.putText(frame, text, (bboxTracker[0], bboxTracker[1] + 25), cv2.FONT_HERSHEY_SIMPLEX,
+                                int(math.ceil(scaleFactor)), color, int(math.ceil(scaleFactor * 2.0)), cv2.LINE_AA)
 
         persons = []
         for object in objects:
@@ -191,18 +197,19 @@ def runObjectDetection(filename, scaleFactor, width, detectThreshold, searchThre
                 object.pop('class', None)
                 persons.append(object)
 
-        for i in range(0, len(validTrackers)):
-            if validTrackers[i]:
-                persons.append(
-                    {
-                        'score': detectThreshold,
-                        'x1': float(bboxesTracker[i][0]) / videoWidth,
-                        'y1': float(bboxesTracker[i][1]) / videoHeight,
-                        'x2': float(bboxesTracker[i][2]) / videoWidth,
-                        'y2': float(bboxesTracker[i][3]) / videoHeight,
-                        'id': i
-                    }
-                )
+        if useTracker:
+            for i in range(0, len(validTrackers)):
+                if validTrackers[i]:
+                    persons.append(
+                        {
+                            'score': detectThreshold,
+                            'x1': float(bboxesTracker[i][0]) / videoWidth,
+                            'y1': float(bboxesTracker[i][1]) / videoHeight,
+                            'x2': float(bboxesTracker[i][2]) / videoWidth,
+                            'y2': float(bboxesTracker[i][3]) / videoHeight,
+                            'id': i
+                        }
+                    )
 
         if len(persons) > 0:
             framesHavingHuman.append(frameIndex)
@@ -248,8 +255,9 @@ def main():
     searchThreshold = args.searchThreshold
     outputFilename = args.outputFilename
     disalbeDisplay = args.disalbeDisplay
+    useTracker = args.useTracker
 
-    runObjectDetection(filename, scaleFactor, width, detectThreshold, searchThreshold, outputFilename, disalbeDisplay)
+    runObjectDetection(filename, scaleFactor, width, detectThreshold, searchThreshold, outputFilename, disalbeDisplay, useTracker)
 
 
 if __name__ == '__main__':
