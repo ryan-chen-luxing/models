@@ -9,7 +9,15 @@ def my_hook(d):
     if d['status'] == 'finished':
         videoId = os.path.splitext(os.path.split(d['filename'])[1])[0]
 
-        t = time.clock()
+        video = cv2.VideoCapture(d['filename'])
+        videoWidth = video.get(cv2.CAP_PROP_FRAME_WIDTH)
+        videoHeight = video.get(cv2.CAP_PROP_FRAME_HEIGHT)
+        frameRate = video.get(cv2.CAP_PROP_FPS)
+        frameCount = video.get(cv2.CAP_PROP_FRAME_COUNT)
+        print('video fps={}, frameCount={}, width={}, height={}'.format(
+            int(frameRate), int(frameCount), int(videoWidth), int(videoHeight)))
+
+        t = time.time()
         command = 'python ObjectDetectionModule.py'
         command += ' --filename "{}"'.format(d['filename'])
         command += ' --scaleFactor "{}"'.format(1.0)
@@ -18,19 +26,22 @@ def my_hook(d):
         command += ' --outputFilename "{}"'.format(videoId + '_objectDetection.json')
 
         os.system(command)
-        print('object detection time elapsed: {} seconds'.format(time.clock() - t))
+        d = time.time() - t
+        print('object detection time elapsed: {} seconds, fps={}'.format(d, frameCount / d))
 
-        t = time.clock()
+        t = time.time()
         command = '/home/ubuntu/openpose/build/examples/openpose/openpose.bin'
         command += ' --video "{}"'.format(d['filename'])
         command += ' --youtubeId "{}"'.format(videoId)
+        command += ' --inputObjectDetection "{}"'.format(1)
         #command += ' --visualizeKeyframes {}'.format(0)
         command += ' --render_pose {}'.format(0)
         command += ' --display {}'.format(0)
         command += ' --model_pose {}'.format("COCO")
 
         os.system(command)
-        print('pose tracking time elapsed: {} seconds'.format(time.clock() - t))
+        d = time.time() - t
+        print('pose tracking time elapsed: {} seconds, fps={}'.format(d, frameCount / d))
 
 def process(id):
     ydl = youtube_dl.YoutubeDL(
