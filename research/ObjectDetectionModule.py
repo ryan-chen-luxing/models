@@ -75,8 +75,8 @@ def runObjectDetection(filename, scaleFactor, width, detectThreshold, searchThre
     if width > 0 and width < videoWidth:
         scaleFactor = float(width) / videoWidth
 
-    resizeWidth = round(videoWidth * scaleFactor)
-    resizeHeight = round(videoHeight * scaleFactor)
+    resizeWidth = int(round(videoWidth * scaleFactor))
+    resizeHeight = int(round(videoHeight * scaleFactor))
 
     if scaleFactor != 1.0:
       print('resize from [{}, {}] to [{}, {}]'.format(videoWidth, videoHeight, resizeWidth, resizeHeight))
