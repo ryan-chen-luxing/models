@@ -6,9 +6,6 @@ import math
 import object_detection_api
 import tensorflow as tf
 
-
-
-
 args = tf.app.flags.FLAGS
 if __name__ == '__main__':
     tf.app.flags.DEFINE_string('filename', None, 'input video filename')
@@ -110,6 +107,7 @@ def runObjectDetection(filename, scaleFactor, width, detectThreshold, searchThre
 
     #resultObjectDetection.append(framesHavingHuman)
 
+    theApi = object_detection_api.ObjectDetectionApi()
 
     while(cap.isOpened()):
         frameIndex = int(cap.get(cv2.CAP_PROP_POS_FRAMES))
@@ -144,8 +142,7 @@ def runObjectDetection(filename, scaleFactor, width, detectThreshold, searchThre
                     validTrackers[i] = False
                     print('trackers[{}] expired'.format(i))
 
-        objects = object_detection_api.get_objects(frame, detectThreshold)
-
+        objects = theApi.getObjects(frame, detectThreshold)
 
         for object in objects:
             if object['class'] not in classesToTrack:
