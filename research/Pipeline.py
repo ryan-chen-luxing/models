@@ -3,6 +3,7 @@ import json
 import os
 import time
 import sys
+import cv2
 #import tykoapi
 
 def my_hook(d):
