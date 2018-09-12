@@ -221,13 +221,12 @@ def runObjectDetection(filename, scaleFactor, width, detectThreshold, searchThre
         #    }
         #)
 
-        fontSize = math.ceil(float(resizeWidth) / 960)
-        cv2.putText(frame, str(frameIndex), (fontSize * 25, fontSize * 25), cv2.FONT_HERSHEY_SIMPLEX, fontSize, (128, 128, 128), fontSize, cv2.LINE_AA)
-
         if not disalbeDisplay:
+            fontSize = int(math.ceil(float(resizeWidth) / 960))
+            cv2.putText(frame, str(frameIndex), (fontSize * 25, fontSize * 25), cv2.FONT_HERSHEY_SIMPLEX, fontSize, (128, 128, 128), fontSize, cv2.LINE_AA)
+
             cv2.imshow('frame', frame)
             cv2.waitKey(1)
-
 
     resultObjectDetection = {
         'framesPoseTracking': framesHavingHuman,
