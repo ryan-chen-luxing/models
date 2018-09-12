@@ -26,8 +26,8 @@ def my_hook(d):
         command += ' --outputFilename "{}"'.format(videoId + '_objectDetection.json')
 
         os.system(command)
-        d = time.time() - t
-        print('object detection time elapsed: {} seconds, fps={}'.format(d, frameCount / d))
+        elapsed = time.time() - t
+        print('object detection time elapsed: {} seconds, fps={}'.format(elapsed, frameCount / elapsed))
 
         t = time.time()
         command = '/home/ubuntu/openpose/build/examples/openpose/openpose.bin'
@@ -40,8 +40,8 @@ def my_hook(d):
         command += ' --model_pose {}'.format("COCO")
 
         os.system(command)
-        d = time.time() - t
-        print('pose tracking time elapsed: {} seconds, fps={}'.format(d, frameCount / d))
+        elapsed = time.time() - t
+        print('pose tracking time elapsed: {} seconds, fps={}'.format(elapsed, frameCount / elapsed))
 
 def process(id):
     ydl = youtube_dl.YoutubeDL(
