@@ -65,18 +65,18 @@ class ObjectDetectionApi:
         categories = label_map_util.convert_label_map_to_categories(label_map, max_num_classes=NUM_CLASSES, use_display_name=True)
         self.category_index = label_map_util.create_category_index(categories)
 
-        print('starting session...')
-        with detection_graph.as_default():
-          with tf.Session(graph=detection_graph) as self.sess:
-            # Definite input and output Tensors for detection_graph
-            self.image_tensor = detection_graph.get_tensor_by_name('image_tensor:0')
-            # Each box represents a part of the image where a particular object was detected.
-            self.detection_boxes = detection_graph.get_tensor_by_name('detection_boxes:0')
-            # Each score represent how level of confidence for each of the objects.
-            # Score is shown on the result image, together with the class label.
-            self.detection_scores = detection_graph.get_tensor_by_name('detection_scores:0')
-            self.detection_classes = detection_graph.get_tensor_by_name('detection_classes:0')
-            self.num_detections = detection_graph.get_tensor_by_name('num_detections:0')
+        print('creating session...')
+        detection_graph.as_default()
+        self.sess = tf.Session(graph=detection_graph)
+        # Definite input and output Tensors for detection_graph
+        self.image_tensor = detection_graph.get_tensor_by_name('image_tensor:0')
+        # Each box represents a part of the image where a particular object was detected.
+        self.detection_boxes = detection_graph.get_tensor_by_name('detection_boxes:0')
+        # Each score represent how level of confidence for each of the objects.
+        # Score is shown on the result image, together with the class label.
+        self.detection_scores = detection_graph.get_tensor_by_name('detection_scores:0')
+        self.detection_classes = detection_graph.get_tensor_by_name('detection_classes:0')
+        self.num_detections = detection_graph.get_tensor_by_name('num_detections:0')
 
     # Helper code
     def load_image_into_numpy_array(image):
