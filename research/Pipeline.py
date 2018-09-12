@@ -3,25 +3,24 @@ import json
 import os
 import time
 import sys
-import tykoapi
+#import tykoapi
 
 def my_hook(d):
     if d['status'] == 'finished':
         videoId = os.path.splitext(os.path.split(d['filename'])[1])[0]
 
         t = time.clock()
-        command = 'python ObjectDetectionModule.py'
+        command = 'C:/Users/ryan/AppData/Local/Programs/Python/Python36/python.exe ObjectDetectionModule.py'
         command += ' --filename "{}"'.format(d['filename'])
         command += ' --scaleFactor "{}"'.format(1.0)
         command += ' --width "{}"'.format(640)
-        command += ' --disalbeDisplay "{}"'.format(1)
         command += ' --outputFilename "{}"'.format(videoId + '_objectDetection.json')
 
         os.system(command)
         print('object detection time elapsed: {} seconds'.format(time.clock() - t))
 
         t = time.clock()
-        command = '/home/ubuntu/openpose/build/examples/openpose/openpose.bin'
+        command = 'C:/Projects/CNN/openpose/build/bin/OpenPoseDemo.exe'
         command += ' --video "{}"'.format(d['filename'])
         command += ' --youtubeId "{}"'.format(videoId)
         #command += ' --visualizeKeyframes {}'.format(0)
