@@ -4,7 +4,10 @@ import os
 import time
 import sys
 import cv2
+import argparse
 #import tykoapi
+
+skipObjectDetection = False
 
 def my_hook(d):
     if d['status'] == 'finished':
@@ -18,27 +21,30 @@ def my_hook(d):
         print('video fps={}, frameCount={}, width={}, height={}'.format(
             int(frameRate), int(frameCount), int(videoWidth), int(videoHeight)))
 
-        t = time.time()
-        command = 'python ObjectDetectionModule.py'
-        command += ' --filename "{}"'.format(d['filename'])
-        command += ' --scaleFactor "{}"'.format(1.0)
-        command += ' --width "{}"'.format(640)
-        command += ' --disalbeDisplay "{}"'.format(1)
-        command += ' --outputFilename "{}"'.format(videoId + '_objectDetection.json')
+        if not skipObjectDetection:
+          t = time.time()
+          command = 'python ObjectDetectionModule.py'
+          command += ' --filename "{}"'.format(d['filename'])
+          command += ' --scaleFactor "{}"'.format(1.0)
+          command += ' --width "{}"'.format(640)
+          command += ' --disalbeDisplay "{}"'.format(1)
+          command += ' --outputFilename "{}"'.format(videoId + '_objectDetection.json')
 
-        os.system(command)
-        elapsed = time.time() - t
-        print('object detection time elapsed: {} seconds, fps={}'.format(elapsed, frameCount / elapsed))
+          os.system(command)
+          elapsed = time.time() - t
+          print('object detection time elapsed: {} seconds, fps={}'.format(elapsed, frameCount / elapsed))
 
         t = time.time()
         command = '/home/ubuntu/openpose/build/examples/openpose/openpose.bin'
         command += ' --video "{}"'.format(d['filename'])
         command += ' --youtubeId "{}"'.format(videoId)
-        command += ' --inputObjectDetection "{}"'.format(1)
         #command += ' --visualizeKeyframes {}'.format(0)
         command += ' --render_pose {}'.format(0)
         command += ' --display {}'.format(0)
         #command += ' --model_pose {}'.format("COCO")
+        
+        if not skipObjectDetection:
+            command += ' --inputObjectDetection "{}"'.format(1)
 
         os.system(command)
         elapsed = time.time() - t
@@ -66,6 +72,13 @@ if __name__ == '__main__':
     #OAuthUsername = "cqX5kBK1TkG8w8zKeW"
     #VerifySslCert = True
     #tyko = tykoapi.TykoApi(BaseUrl, OAuthUsername, VerifySslCert)
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--skipObjectDetection", help="Whether to run objection detection module or not", action="store_true")
+    args = parser.parse_args()
+
+    skipObjectDetection = args.skipObjectDetection
+    
     process(
         "b9OlwQEnncs"
     )
