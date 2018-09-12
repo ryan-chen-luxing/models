@@ -41,7 +41,7 @@ def my_hook(d):
         #command += ' --visualizeKeyframes {}'.format(0)
         command += ' --render_pose {}'.format(0)
         command += ' --display {}'.format(0)
-        #command += ' --model_pose {}'.format("COCO")
+        command += ' --model_pose {}'.format("COCO")
         
         if not skipObjectDetection:
             command += ' --inputObjectDetection "{}"'.format(1)
