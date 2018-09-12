@@ -12,6 +12,7 @@ def my_hook(d):
         command += ' --filename "{}"'.format(d['filename'])
         command += ' --scaleFactor "{}"'.format(1.0)
         command += ' --width "{}"'.format(640)
+        command += ' --disalbeDisplay "{}"'.format(1)
         command += ' --outputFilename "{}"'.format(videoId + '_ObjectDetection.json')
 
         os.system(command)
@@ -23,7 +24,7 @@ def my_hook(d):
         #command += ' --face --hand'
         #command += ' --videoInfo "{}_ObjectDetection.json"'.format(videoId)
 
-        os.system(command)
+        #os.system(command)
 
 def process(id):
     ydl = youtube_dl.YoutubeDL(

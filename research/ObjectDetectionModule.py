@@ -17,6 +17,7 @@ if __name__ == '__main__':
     tf.app.flags.DEFINE_float('detectThreshold', 0.5, 'threshold used in detecting objects')
     tf.app.flags.DEFINE_float('searchThreshold', 0.25, 'threshold used in searching objects being tracked')
     tf.app.flags.DEFINE_string('outputFilename', None, 'output filename of the json ')
+    tf.app.flags.DEFINE_bool('disalbeDisplay', False, 'for console terminal')
 
 class NumpyEncoder(json.JSONEncoder):
     """ Special json encoder for numpy types """
@@ -65,7 +66,7 @@ def searchObject(bbox, className, validTrackers, bboxesTracker, classNamesTracke
                     result = i
     return result
 
-def runObjectDetection(filename, scaleFactor, width, detectThreshold, searchThreshold, outputFilename):
+def runObjectDetection(filename, scaleFactor, width, detectThreshold, searchThreshold, outputFilename, disalbeDisplay):
     cap = cv2.VideoCapture(filename)
     videoWidth = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
     videoHeight = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
@@ -76,6 +77,9 @@ def runObjectDetection(filename, scaleFactor, width, detectThreshold, searchThre
 
     resizeWidth = round(videoWidth * scaleFactor)
     resizeHeight = round(videoHeight * scaleFactor)
+
+    if scaleFactor != 1.0:
+      print('resize from [{}, {}] to [{}, {}]'.format(videoWidth, videoHeight, resizeWidth, resizeHeight))
 
     classificationInfo = []
 
@@ -223,8 +227,9 @@ def runObjectDetection(filename, scaleFactor, width, detectThreshold, searchThre
         fontSize = math.ceil(float(resizeWidth) / 960)
         cv2.putText(frame, str(frameIndex), (fontSize * 25, fontSize * 25), cv2.FONT_HERSHEY_SIMPLEX, fontSize, (128, 128, 128), fontSize, cv2.LINE_AA)
 
-        cv2.imshow('frame', frame)
-        cv2.waitKey(1)
+        if not disalbeDisplay:
+            cv2.imshow('frame', frame)
+            cv2.waitKey(1)
 
 
     resultObjectDetection = {
@@ -246,8 +251,9 @@ def main():
     detectThreshold = args.detectThreshold
     searchThreshold = args.searchThreshold
     outputFilename = args.outputFilename
+    disalbeDisplay = args.disalbeDisplay
 
-    runObjectDetection(filename, scaleFactor, width, detectThreshold, searchThreshold, outputFilename)
+    runObjectDetection(filename, scaleFactor, width, detectThreshold, searchThreshold, outputFilename, disalbeDisplay)
 
 
 if __name__ == '__main__':
