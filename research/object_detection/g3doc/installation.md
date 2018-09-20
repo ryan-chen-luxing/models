@@ -129,5 +129,6 @@ API by running the following command:
 python object_detection/builders/model_builder_test.py
 ```
 
-Windows Installatin
+# Windows Installation
+
 https://medium.com/@rohitrpatil/how-to-use-tensorflow-object-detection-api-on-windows-102ec8097699
