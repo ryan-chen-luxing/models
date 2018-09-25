@@ -10,6 +10,7 @@ import platform
 
 skipObjectDetection = False
 maxFramesPerSegment = 0
+outputFolder = ''
 
 def my_hook(d):
     if d['status'] == 'finished':
@@ -26,6 +27,8 @@ def my_hook(d):
         if not skipObjectDetection:
             t = time.time()
 
+            outputObjectDetectionFilename = os.path.join(outputFolder, 'objectDetection.json')
+
             if platform.system() == 'Windows':
                 command = 'C:/Users/ryan/AppData/Local/Programs/Python/Python36/python.exe ObjectDetectionModule.py'
             else:
@@ -34,7 +37,7 @@ def my_hook(d):
             command += ' --filename "{}"'.format(d['filename'])
             command += ' --scaleFactor "{}"'.format(1.0)
             command += ' --width "{}"'.format(640)
-            command += ' --outputFilename "{}"'.format(videoId + '_objectDetection.json')
+            command += ' --outputFilename "{}"'.format(outputObjectDetectionFilename)
 
             os.system(command)
             elapsed = time.time() - t
@@ -50,12 +53,12 @@ def my_hook(d):
             command += ' --display {}'.format(0)
 
         command += ' --video "{}"'.format(d['filename'])
-        command += ' --youtubeId "{}"'.format(videoId)
         #command += ' --visualizeKeyframes {}'.format(0)
         command += ' --maxFramesPerSegment {}'.format(maxFramesPerSegment)
+        command += ' --write_custom_json {}'.format(outputFolder)
 
         if not skipObjectDetection:
-            command += ' --inputObjectDetection'
+            command += ' --inputObjectDetection {}'.format(outputObjectDetectionFilename)
 
         os.system(command)
         elapsed = time.time() - t
@@ -89,9 +92,14 @@ if __name__ == '__main__':
                         action="store_true")
     parser.add_argument("--maxFramesPerSegment", type=int, help="used to split the json file for pose tracking")
     parser.add_argument("--youtubeId", type=str, help="")
+    parser.add_argument("--outputFolder", type=str, help="")
     args = parser.parse_args()
 
     skipObjectDetection = args.skipObjectDetection
     maxFramesPerSegment = args.maxFramesPerSegment
+    outputFolder = os.path.join(args.outputFolder, args.youtubeId)
+
+    if not os.path.exists(outputFolder):
+        os.makedirs(outputFolder)
 
     process(args.youtubeId)
