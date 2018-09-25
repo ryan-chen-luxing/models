@@ -57,6 +57,8 @@ def my_hook(d):
         command += ' --maxFramesPerSegment {}'.format(maxFramesPerSegment)
         command += ' --write_custom_json {}'.format(outputFolder)
 
+        command += ' --logging_level 1'
+
         if not skipObjectDetection:
             command += ' --inputObjectDetection {}'.format(outputObjectDetectionFilename)
 
