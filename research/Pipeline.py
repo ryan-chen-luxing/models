@@ -48,16 +48,16 @@ def my_hook(d):
             command = 'C:/Projects/CNN/openpose/build/bin/OpenPoseDemo.exe'
         else:
             command = '/home/ubuntu/openpose/build/examples/openpose/openpose.bin'
-            command += ' --model_pose {}'.format("COCO")
-            command += ' --render_pose {}'.format(0)
-            command += ' --display {}'.format(0)
+            command += ' --model_pose COCO'
+        command += ' --render_pose 0'
+        command += ' --display 0'
 
         command += ' --video "{}"'.format(d['filename'])
         #command += ' --visualizeKeyframes {}'.format(0)
         command += ' --maxFramesPerSegment {}'.format(maxFramesPerSegment)
         command += ' --write_custom_json {}'.format(outputFolder)
 
-        command += ' --logging_level 1'
+        command += ' --logging_level 2'
 
         if not skipObjectDetection:
             command += ' --inputObjectDetection {}'.format(outputObjectDetectionFilename)
